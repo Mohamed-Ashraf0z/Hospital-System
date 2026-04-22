@@ -49,6 +49,7 @@ if (dbUser.isPresent() &&
 
     String token = Jwts.builder()
         .subject(user.getEmail())
+        .claim("role", dbUser.get().getRole())
         .issuedAt(new Date())
         .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
         .signWith(getSignKey())
@@ -100,6 +101,7 @@ if (dbUser.isPresent() &&
         }
 
         user.hashpassword();
+        user.encryptPhone();
         authRepo.save(user);
         return ResponseEntity.ok(
             new ApiResponse(

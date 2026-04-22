@@ -1,5 +1,10 @@
 package com.hospita.sys.features.auth.entity;
 
+import java.util.Base64;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -38,6 +43,35 @@ public class User {
     public void hashpassword() {
         PasswordEncoder encoder = new BCryptPasswordEncoder();
     this.password = encoder.encode(this.password);
+    }
+
+
+    // Phone encryption and decryption
+    private static final String SECRET_KEY = "1234567890123456"; // 16 chars only REQUIRED for AES-128
+
+    private SecretKeySpec getKey() {
+        return new SecretKeySpec(SECRET_KEY.getBytes(), "AES");
+    }
+
+    public void encryptPhone() {
+        try {
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.ENCRYPT_MODE, getKey());
+            this.phone = Base64.getEncoder()
+                    .encodeToString(cipher.doFinal(this.phone.getBytes()));
+        } catch (Exception e) {
+            throw new RuntimeException("Error encrypting phone", e);
+        }
+    }
+
+    public String decryptPhone() {
+        try {
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, getKey());
+            return new String(cipher.doFinal(Base64.getDecoder().decode(this.phone)));
+        } catch (Exception e) {
+            throw new RuntimeException("Error decrypting phone", e);
+        }
     }
 
 
