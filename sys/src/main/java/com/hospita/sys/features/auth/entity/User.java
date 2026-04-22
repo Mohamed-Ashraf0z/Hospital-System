@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
@@ -22,6 +23,11 @@ public class User {
     private String role;
     @NotBlank(message = "Password is required")
     private String password;
+    @Email
+    @NotBlank(message = "Email is required")
+    private String email;
+    private String phone;
+    private boolean auth = false;
 
 
     public String getRole() {
@@ -34,6 +40,14 @@ public class User {
     this.password = encoder.encode(this.password);
     }
 
+
+    public void authtrue() {
+        this.auth = true;
+    }
+    public void authfalse() {
+        this.auth = false;
+    }
+
     // public String getall() {
     //     return role + " " + username + " " + password;
     // }
@@ -41,5 +55,9 @@ public class User {
     // public String getpass() {
     //     return password;
     // }
+
+    public boolean getAuth() {
+        return auth;
+    }
 
 }

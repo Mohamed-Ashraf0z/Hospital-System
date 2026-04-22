@@ -9,5 +9,5 @@ import com.hospita.sys.features.auth.entity.User;
 
 @Repository
 public interface AuthRepo extends JpaRepository<User, Long> {
-    Optional<User> findByUsername(String username);
+    Optional<User> findByEmail(String Email);
 }

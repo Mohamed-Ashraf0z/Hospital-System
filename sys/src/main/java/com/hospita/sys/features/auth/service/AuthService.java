@@ -4,8 +4,11 @@ import java.security.Key;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
+import com.hospita.sys.features.auth.entity.ApiResponse;
 import com.hospita.sys.features.auth.entity.User;
 import com.hospita.sys.features.auth.repo.AuthRepo;
 
@@ -38,36 +41,104 @@ public class AuthService {
 //     }
 
 ////////////underwork//////////////////////////////////////////////////
-    public String login(User user){
-        user.hashpassword();
-        if( authRepo.findByUsername(user.getUsername()).isPresent() &&
-        authRepo.findByUsername(user.getUsername()).get().getPassword().equals(user.getPassword())){
-            // String token = jwtService.generateToken(user.getUsername());
-            String token = Jwts.builder()
-                .subject(user.getUsername())
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // ساعة
-                .signWith(getSignKey())
-                .compact();
-            return "login success " + token;
-        }
-        return "login failed " + user.getUsername() + " " + user.getPassword() + " " + authRepo.findByUsername(user.getUsername()).get().getPassword();
+    public ResponseEntity<ApiResponse> login(User user){
+        var dbUser = authRepo.findByEmail(user.getEmail());
+
+if (dbUser.isPresent() &&
+    BCrypt.checkpw(user.getPassword(), dbUser.get().getPassword()) && dbUser.get().getAuth() == true) {
+
+    String token = Jwts.builder()
+        .subject(user.getEmail())
+        .issuedAt(new Date())
+        .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+        .signWith(getSignKey())
+        .compact();
+
+    return ResponseEntity.ok(
+        new ApiResponse(
+            true,
+            "login success",
+            token,
+            null
+        )
+    );
+}
+        return ResponseEntity.ok(
+            new ApiResponse(
+                false,
+                "login failed",
+                null,
+                null
+            )
+        );
     }
 
-    public String signup(User user){
-        if (authRepo.findByUsername(user.getUsername()).isPresent()){
-            return "existing username";
+    public ResponseEntity<ApiResponse> signup(User user){
+        user.authfalse();
+        if (authRepo.findByEmail(user.getEmail()).isPresent()){
+            return ResponseEntity.ok(
+                new ApiResponse(
+                    false,
+                    "Email already exist",
+                    null,
+                    null
+                )
+            );
         }
-        if(user.getRole().contains("Doctor")){
-            return "you re doctor !!";
+        if(user.getRole().contains("Patient")){
+            user.authtrue();
         }
-        if(!(user.getRole().contains("Patient"))){
-            return "wrong role";
+        if(!(user.getRole().contains("Patient")) && !(user.getRole().contains("Doctor"))){
+            return ResponseEntity.ok(
+                new ApiResponse(
+                    false,
+                    "invalid role",
+                    null,
+                    null
+                )
+            );
         }
 
         user.hashpassword();
         authRepo.save(user);
-        return "signup success";
+        return ResponseEntity.ok(
+            new ApiResponse(
+                true,
+                "signup success",
+                null,
+                null
+            )
+        );
     }
+
+    // public ResponseEntity<ApiResponse> logout(User user){
+
+    //     return ResponseEntity.ok(
+    //         new ApiResponse(
+    //             true,
+    //             "logout success",
+    //             null,
+    //             null
+    //         )
+    //     );
+    // }
+
+//     public ResponseEntity<ApiResponse> logout(HttpServletRequest request) {
+//     String token = extractToken(request); // هقولك عليها تحت
+//     // blacklistService.add(token);
+
+//     return ResponseEntity.ok(
+//         new ApiResponse(true, "logout success", token, null)
+//     );
+// }
+
+// private String extractToken(HttpServletRequest request) {
+//     String header = request.getHeader("Authorization");
+
+//     if (header != null ) {
+//         return header;
+//     }
+//     return null;
+// }
 
 }
