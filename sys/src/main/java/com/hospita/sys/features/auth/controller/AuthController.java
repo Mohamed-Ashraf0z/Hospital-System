@@ -34,7 +34,7 @@ public class AuthController {
     private CloudinaryService cloudinaryService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse> login(@Valid @RequestBody User user){
+    public ResponseEntity<ApiResponse> login(@RequestBody User user){
         return authService.login(user);
     }
 

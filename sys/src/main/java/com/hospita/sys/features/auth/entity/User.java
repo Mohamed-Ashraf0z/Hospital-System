@@ -14,10 +14,12 @@ import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
+import lombok.Setter;
 
 
 @Entity
 @Getter
+@Setter
 public class User {
     @Id
     @GeneratedValue
@@ -33,6 +35,7 @@ public class User {
     private String email;
     private String phone;
     private boolean auth = false;
+    private boolean isFrozen = false;
 
 
     public String getRole() {

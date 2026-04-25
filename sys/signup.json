@@ -1,0 +1,8 @@
+{
+  "username": "testdoctor",
+  "email": "doctor@test.com",
+  "password": "password123",
+  "age": 35,
+  "phone": "0123456789",
+  "role": "Doctor"
+}
