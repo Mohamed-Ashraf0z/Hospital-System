@@ -1,5 +1,6 @@
 package com.hospita.sys.features.admin.controller;
 
+import com.hospita.sys.features.admin.exception.AdminAccessDeniedException;
 import com.hospita.sys.features.admin.dto.DoctorPendingDto;
 import com.hospita.sys.features.admin.dto.DoctorVerificationDecisionDto;
 import com.hospita.sys.features.admin.service.DoctorVerificationService;
@@ -32,8 +33,6 @@ public class DoctorVerificationController {
     }
 
     private boolean isAdmin(HttpServletRequest request) {
-        return true;
-        /*
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return false;
@@ -52,13 +51,12 @@ public class DoctorVerificationController {
         } catch (Exception e) {
             return false;
         }
-        */
     }
 
     @GetMapping("/pending")
     public ResponseEntity<?> getPendingDoctors(HttpServletRequest request) {
         if (!isAdmin(request)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized: Invalid token or not an admin.");
+            throw new AdminAccessDeniedException();
         }
         List<DoctorPendingDto> pendingDoctors = verificationService.getPendingDoctors();
         return ResponseEntity.ok(pendingDoctors);
@@ -67,13 +65,9 @@ public class DoctorVerificationController {
     @PutMapping("/{id}/verify")
     public ResponseEntity<?> verifyDoctor(@PathVariable Long id, @RequestBody DoctorVerificationDecisionDto decision, HttpServletRequest request) {
         if (!isAdmin(request)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized: Invalid token or not an admin.");
+            throw new AdminAccessDeniedException();
         }
-        try {
-            String resultMessage = verificationService.verifyDoctor(id, decision);
-            return ResponseEntity.ok(resultMessage);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error updating verification status: " + e.getMessage());
-        }
+        String resultMessage = verificationService.verifyDoctor(id, decision);
+        return ResponseEntity.ok(resultMessage);
     }
 }

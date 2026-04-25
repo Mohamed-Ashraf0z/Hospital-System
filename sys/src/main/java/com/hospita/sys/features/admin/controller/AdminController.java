@@ -1,7 +1,9 @@
 package com.hospita.sys.features.admin.controller;
 
+import java.security.Key;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,8 +14,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hospita.sys.features.admin.exception.AdminAccessDeniedException;
 import com.hospita.sys.features.admin.dto.UserDto;
 import com.hospita.sys.features.admin.service.AdminService;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/admin/users")
@@ -21,33 +29,58 @@ import com.hospita.sys.features.admin.service.AdminService;
 public class AdminController {
 
     private final AdminService adminService;
+    private final String SECRET = "my-secret-key-my-secret-key-my-secret-key";
 
     public AdminController(AdminService adminService) {
         this.adminService = adminService;
     }
 
+    private Key getSignKey() {
+        return Keys.hmacShaKeyFor(SECRET.getBytes());
+    }
+
+    private boolean isAdmin(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return false;
+        }
+        String token = authHeader.substring(7);
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSignKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            String role = claims.get("role", String.class);
+            return role != null && role.equalsIgnoreCase("admin");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     @GetMapping
-    public ResponseEntity<List<UserDto>> getAllUsers() {
+    public ResponseEntity<?> getAllUsers(HttpServletRequest request) {
+        if (!isAdmin(request)) {
+            throw new AdminAccessDeniedException();
+        }
         return ResponseEntity.ok(adminService.getAllUsers());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        try {
-            adminService.deleteUser(id);
-            return ResponseEntity.ok("User with id " + id + " has been deleted.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error deleting user: " + e.getMessage());
+    public ResponseEntity<String> deleteUser(@PathVariable Long id, HttpServletRequest request) {
+        if (!isAdmin(request)) {
+            throw new AdminAccessDeniedException();
         }
+        adminService.deleteUser(id);
+        return ResponseEntity.ok("User with id " + id + " has been deleted.");
     }
 
     @PutMapping("/{id}/freeze")
-    public ResponseEntity<?> freezeUser(@PathVariable Long id) {
-        try {
-            UserDto frozenUser = adminService.freezeUser(id);
-            return ResponseEntity.ok(frozenUser);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error freezing user: " + e.getMessage());
+    public ResponseEntity<?> freezeUser(@PathVariable Long id, HttpServletRequest request) {
+        if (!isAdmin(request)) {
+            throw new AdminAccessDeniedException();
         }
+        UserDto frozenUser = adminService.freezeUser(id);
+        return ResponseEntity.ok(frozenUser);
     }
 }

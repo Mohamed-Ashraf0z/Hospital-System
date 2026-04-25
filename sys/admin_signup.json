@@ -1,8 +1,0 @@
-{
-  "username": "newadmin",
-  "email": "admin@test.com",
-  "password": "adminpassword",
-  "age": 30,
-  "phone": "999999999",
-  "role": "admin"
-}

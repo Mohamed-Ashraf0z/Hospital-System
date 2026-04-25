@@ -1,5 +1,6 @@
 package com.hospita.sys.features.admin.service;
 
+import com.hospita.sys.features.admin.exception.DoctorNotFoundException;
 import com.hospita.sys.features.admin.dto.DoctorPendingDto;
 import com.hospita.sys.features.admin.dto.DoctorVerificationDecisionDto;
 import com.hospita.sys.features.admin.repo.AdminDoctorRepository;
@@ -34,7 +35,7 @@ public class DoctorVerificationService {
 
     public String verifyDoctor(Long id, DoctorVerificationDecisionDto decision) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id " + id));
+                .orElseThrow(() -> new DoctorNotFoundException(id));
 
         if (decision.getIsAccepted()) {
             user.authtrue(); // Method exists in User.java

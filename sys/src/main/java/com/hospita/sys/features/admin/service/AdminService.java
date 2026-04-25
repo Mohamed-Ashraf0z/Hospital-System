@@ -1,5 +1,6 @@
 package com.hospita.sys.features.admin.service;
 
+import com.hospita.sys.features.admin.exception.AdminUserNotFoundException;
 import com.hospita.sys.features.admin.dto.UserDto;
 import com.hospita.sys.features.admin.repo.AdminUserRepository;
 import com.hospita.sys.features.auth.entity.User;
@@ -36,6 +37,6 @@ public class AdminService {
             userRepository.save(user);
             return new UserDto(user);
         }
-        throw new RuntimeException("User not found with id: " + id);
+        throw new AdminUserNotFoundException(id);
     }
 }
