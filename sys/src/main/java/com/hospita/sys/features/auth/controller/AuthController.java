@@ -20,6 +20,7 @@ import com.hospita.sys.features.auth.entity.User;
 import com.hospita.sys.features.auth.service.AuthService;
 import com.hospita.sys.features.auth.service.CloudinaryService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -42,10 +43,10 @@ public class AuthController {
         return authService.signup(user);
     }
 
-    // @PostMapping("/logout")
-    // public ResponseEntity<ApiResponse> logout(HttpServletRequest requesttBody){
-    //     return authService.logout(requesttBody);
-    // }
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse> logout(HttpServletRequest requesttBody){
+        return authService.logout(requesttBody);
+    }
 
     @PostMapping("/doctors/{id}/certificates")
 public ResponseEntity<?> uploadCertificates(
