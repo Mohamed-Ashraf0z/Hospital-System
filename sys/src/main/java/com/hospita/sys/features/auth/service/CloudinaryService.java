@@ -5,13 +5,11 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.hospita.sys.features.auth.entity.ApiResponse;
 import com.hospita.sys.features.auth.entity.Doctor;
 import com.hospita.sys.features.auth.repo.DoctorRepository;
 
@@ -39,11 +37,12 @@ public class CloudinaryService {
     }
 
 
-public ResponseEntity<?> uploadCertificates(
+public void uploadCertificates(
         Long id,
         List<MultipartFile> files) {
 
-    Doctor doctor = doctorRepository.findById(id).orElseThrow();
+    Doctor doctor = new Doctor();
+    doctor.setId(id);
 
     List<String> urls = files.stream()
         .map(new Function<MultipartFile, String>() {
@@ -60,17 +59,17 @@ public ResponseEntity<?> uploadCertificates(
     })
         .toList();
 
-    doctor.getCertificates().addAll(urls);
+    doctor.setCertificates(urls);
     doctorRepository.save(doctor);
 
-    return ResponseEntity.ok(
-        new ApiResponse(
-            true,
-            "Certificates uploaded successfully",
-            null,
-            null
-        )
-    );
+    // return ResponseEntity.ok(
+    //     new ApiResponse(
+    //         true,
+    //         "Certificates uploaded successfully",
+    //         null,
+    //         null
+    //     )
+    // );
 }
 
 public Doctor getDoctor(Long id) {
