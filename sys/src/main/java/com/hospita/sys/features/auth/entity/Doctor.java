@@ -15,10 +15,11 @@ import lombok.Setter;
 public class Doctor {
     
     @Id
-    private long id;
+    private Long id;
     private String bio;
     private float rating;
     private String specialization;
+
 
 
     @ElementCollection
