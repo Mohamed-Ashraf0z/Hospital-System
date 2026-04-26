@@ -1,11 +1,15 @@
 package com.hospita.sys.features.auth.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.hospita.sys.features.auth.entity.ApiResponse;
+import com.hospita.sys.features.auth.entity.DataResponse;
 import com.hospita.sys.features.auth.entity.User;
 import com.hospita.sys.features.auth.helper.JwtUtil;
 import com.hospita.sys.features.auth.repo.AuthRepo;
@@ -22,6 +26,9 @@ public class AuthService {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
 
 
@@ -47,13 +54,18 @@ if (dbUser.isPresent() &&
             new ApiResponse(
                 false,
                 "login failed",
-                null,
+                new DataResponse(
+                    user.getAuth(),
+                    user.getUsername(),
+                    user.getRole(),
+                    user.getId()
+                ),
                 null
             )
         );
     }
 
-    public ResponseEntity<ApiResponse> signup(User user){
+    public ResponseEntity<ApiResponse> signup(User user ,List<MultipartFile> files){
         user.authfalse();
         if (authRepo.findByEmail(user.getEmail()).isPresent()){
             return ResponseEntity.ok(
@@ -65,9 +77,6 @@ if (dbUser.isPresent() &&
                 )
             );
         }
-        if(user.getRole().contains("Patient")){
-            user.authtrue();
-        }
         if(!(user.getRole().contains("Patient")) && !(user.getRole().contains("Doctor"))){
             return ResponseEntity.ok(
                 new ApiResponse(
@@ -78,6 +87,22 @@ if (dbUser.isPresent() &&
                 )
             );
         }
+        if(user.getRole().contains("Patient")){
+            user.authtrue();
+        }
+        if(user.getRole().contains("Doctor")){
+            if(files.isEmpty()){
+                return ResponseEntity.ok(
+                    new ApiResponse(
+                        false,
+                        "upload certificates",
+                        null,
+                        null
+                    )
+                );
+            }
+            cloudinaryService.uploadCertificates(user.getId(), files);
+        }
 
         user.hashpassword();
         user.encryptPhone();
@@ -86,7 +111,12 @@ if (dbUser.isPresent() &&
             new ApiResponse(
                 true,
                 "signup success",
-                null,
+                new DataResponse(
+                    user.getAuth(),
+                    user.getUsername(),
+                    user.getRole(),
+                    user.getId()
+                ),
                 null
             )
         );
