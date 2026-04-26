@@ -30,179 +30,153 @@ public class AuthService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
-
-
-    public ResponseEntity<ApiResponse> login(User user){
+    public ResponseEntity<ApiResponse> login(User user) {
         var dbUser = authRepo.findByEmail(user.getEmail());
 
-if (dbUser.isPresent() &&
-    BCrypt.checkpw(user.getPassword(), dbUser.get().getPassword()) && dbUser.get().getAuth() == true) {
+        if (dbUser.isPresent() &&
+                BCrypt.checkpw(user.getPassword(), dbUser.get().getPassword()) && dbUser.get().getAuth() == true) {
 
-    String token = jwtUtil.generateToken(user, dbUser);
-    // tokenBlacklistService.blacklistToken(token, jwtUtil.getRemainingTime(token));
+            String token = jwtUtil.generateToken(user, dbUser);
+            // tokenBlacklistService.blacklistToken(token, jwtUtil.getRemainingTime(token));
 
-    return ResponseEntity.ok(
-        new ApiResponse(
-            true,
-            "login success",
-            token,
-            null
-        )
-    );
-}
+            return ResponseEntity.ok(
+                    new ApiResponse(
+                            true,
+                            "login success",
+                            token,
+                            null));
+        }
         return ResponseEntity.ok(
-            new ApiResponse(
-                false,
-                "login failed",
-                new DataResponse(
-                    user.getAuth(),
-                    user.getUsername(),
-                    user.getRole(),
-                    user.getId()
-                ),
-                null
-            )
-        );
+                new ApiResponse(
+                        false,
+                        "login failed",
+                        new DataResponse(
+                                user.getAuth(),
+                                user.getUsername(),
+                                user.getRole(),
+                                user.getId()),
+                        null));
     }
 
-    public ResponseEntity<ApiResponse> signup(User user ,List<MultipartFile> files){
+    public ResponseEntity<ApiResponse> signup(User user, List<MultipartFile> files) {
+
         user.authfalse();
-        if (authRepo.findByEmail(user.getEmail()).isPresent()){
+
+        if (authRepo.findByEmail(user.getEmail()).isPresent()) {
             return ResponseEntity.ok(
-                new ApiResponse(
-                    false,
-                    "Email already exist",
-                    null,
-                    null
-                )
-            );
+                    new ApiResponse(false, "Email already exist", null, null));
         }
-        if(!(user.getRole().contains("Patient")) && !(user.getRole().contains("Doctor"))){
+
+        if (!(user.getRole().contains("Patient")) && !(user.getRole().contains("Doctor"))) {
             return ResponseEntity.ok(
-                new ApiResponse(
-                    false,
-                    "invalid role",
-                    null,
-                    null
-                )
-            );
+                    new ApiResponse(false, "invalid role", null, null));
         }
-        if(user.getRole().contains("Patient")){
+
+        if (user.getRole().contains("Patient")) {
             user.authtrue();
-        }
-        if(user.getRole().contains("Doctor")){
-            if(files.isEmpty()){
-                return ResponseEntity.ok(
-                    new ApiResponse(
-                        false,
-                        "upload certificates",
-                        null,
-                        null
-                    )
-                );
-            }
-            cloudinaryService.uploadCertificates(user.getId(), files);
         }
 
         user.hashpassword();
         user.encryptPhone();
-        authRepo.save(user);
-        return ResponseEntity.ok(
-            new ApiResponse(
-                true,
-                "signup success",
-                new DataResponse(
-                    user.getAuth(),
-                    user.getUsername(),
-                    user.getRole(),
-                    user.getId()
-                ),
-                null
-            )
-        );
-    }
 
-    public ResponseEntity<ApiResponse> logout(HttpServletRequest request){
+        User savedUser = authRepo.save(user);
 
-        String token = extractToken(request);
-        if(token == null || !jwtUtil.isValidToken(token)){
-            return ResponseEntity.ok(
-                new ApiResponse(
-                    false,
-                    "logout failed",
-                    null,
-                    null
-                )
-            );
+        if (user.getRole().contains("Doctor")) {
+            if (files.isEmpty()) {
+                return ResponseEntity.ok(
+                        new ApiResponse(false, "upload certificates", null, null));
+            }
+
+            cloudinaryService.uploadCertificates(savedUser.getId(), files);
         }
 
-    long expiration = jwtUtil.getRemainingTime(token);
+        return ResponseEntity.ok(
+                new ApiResponse(
+                        true,
+                        "signup success",
+                        new DataResponse(
+                                savedUser.getAuth(),
+                                savedUser.getUsername(),
+                                savedUser.getRole(),
+                                savedUser.getId()),
+                        null));
+    }
 
-    tokenBlacklistService.blacklistToken(token, expiration);
+    public ResponseEntity<ApiResponse> logout(HttpServletRequest request) {
+
+        String token = extractToken(request);
+        if (token == null || !jwtUtil.isValidToken(token)) {
+            return ResponseEntity.ok(
+                    new ApiResponse(
+                            false,
+                            "logout failed",
+                            null,
+                            null));
+        }
+
+        long expiration = jwtUtil.getRemainingTime(token);
+
+        tokenBlacklistService.blacklistToken(token, expiration);
 
         return ResponseEntity.ok(
-            new ApiResponse(
-                true,
-                "logout success",
-                null,
-                null
-            )
-        );
+                new ApiResponse(
+                        true,
+                        "logout success",
+                        null,
+                        null));
     }
 
     private String extractToken(HttpServletRequest request) {
         if (request == null || request.getHeader("Authorization") == null) {
-    throw new RuntimeException("JWT is missing !!");
-}
-    String bearerToken = request.getHeader("Authorization");
+            throw new RuntimeException("JWT is missing !!");
+        }
+        String bearerToken = request.getHeader("Authorization");
 
-    if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-        return bearerToken.substring(7); // يشيل "Bearer "
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7); // يشيل "Bearer "
+        }
+
+        return null;
     }
 
-    return null;
 }
 
-}
+// public ResponseEntity<ApiResponse> logout(HttpServletRequest request) {
+// String token = extractToken(request); // هقولك عليها تحت
+// // blacklistService.add(token);
 
-//     public ResponseEntity<ApiResponse> logout(HttpServletRequest request) {
-//     String token = extractToken(request); // هقولك عليها تحت
-//     // blacklistService.add(token);
-
-//     return ResponseEntity.ok(
-//         new ApiResponse(true, "logout success", token, null)
-//     );
+// return ResponseEntity.ok(
+// new ApiResponse(true, "logout success", token, null)
+// );
 // }
 
 // private String extractToken(HttpServletRequest request) {
-//     String header = request.getHeader("Authorization");
+// String header = request.getHeader("Authorization");
 
-//     if (header != null ) {
-//         return header;
-//     }
-//     return null;
+// if (header != null ) {
+// return header;
+// }
+// return null;
 // }
 
+// private final String SECRET = "my-secret-key-my-secret-key-my-secret-key";
 
-
-    // private final String SECRET = "my-secret-key-my-secret-key-my-secret-key";
-
-    // private Key getSignKey() {
-    //     return Keys.hmacShaKeyFor(SECRET.getBytes());
-    // }
-
-//     public String extractUsername(String token) {
-//     return Jwts.parser()
-//             .verifyWith(getSignKey())
-//             .build()
-//             .parseSignedClaims(token)
-//             .getPayload()
-//             .getSubject();
+// private Key getSignKey() {
+// return Keys.hmacShaKeyFor(SECRET.getBytes());
 // }
 
-//     public String verifytoken(String token){
-//         String username = extractUsername(token);
-//         System.out.println(username);
-//     }
+// public String extractUsername(String token) {
+// return Jwts.parser()
+// .verifyWith(getSignKey())
+// .build()
+// .parseSignedClaims(token)
+// .getPayload()
+// .getSubject();
+// }
 
-////////////underwork//////////////////////////////////////////////////
+// public String verifytoken(String token){
+// String username = extractUsername(token);
+// System.out.println(username);
+// }
+
+//////////// underwork//////////////////////////////////////////////////

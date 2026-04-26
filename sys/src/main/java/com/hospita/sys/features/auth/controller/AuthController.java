@@ -24,6 +24,7 @@ import com.hospita.sys.features.auth.service.CloudinaryService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/auth")
@@ -36,41 +37,41 @@ public class AuthController {
     private CloudinaryService cloudinaryService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse> login(@RequestBody User user){
+    public ResponseEntity<ApiResponse> login(@RequestBody User user) {
         return authService.login(user);
     }
 
     // consumes = {"multipart/form-data"}
     // consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse> signup(@Valid @RequestPart("user") User user ,@RequestPart(value = "files", required = false) List<MultipartFile> files){
+    public ResponseEntity<ApiResponse> signup(@Valid @RequestPart("user") User user,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) {
         try {
-            if(files == null){
+            if (files == null) {
                 files = new ArrayList<>();
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             files = new ArrayList<>();
         }
         return authService.signup(user, files);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse> logout(HttpServletRequest requesttBody){
+    public ResponseEntity<ApiResponse> logout(HttpServletRequest requesttBody) {
         return authService.logout(requesttBody);
     }
 
-//     @PostMapping("/doctors/{id}/certificates")
-// public ResponseEntity<?> uploadCertificates(
-//         @PathVariable Long id,
-//         @RequestParam("files") List<MultipartFile> files) {
+    // @PostMapping("/doctors/{id}/certificates")
+    // public ResponseEntity<?> uploadCertificates(
+    // @PathVariable Long id,
+    // @RequestParam("files") List<MultipartFile> files) {
 
-// return cloudinaryService.uploadCertificates(id, files);
-// }
+    // return cloudinaryService.uploadCertificates(id, files);
+    // }
 
-@GetMapping("/admin/doctors/{id}")
-public Doctor getDoctor(@PathVariable Long id) {
-    return cloudinaryService.getDoctor(id);
-}
+    @GetMapping("/admin/doctors/{id}")
+    public Doctor getDoctor(@PathVariable Long id) {
+        return cloudinaryService.getDoctor(id);
+    }
 
 }
