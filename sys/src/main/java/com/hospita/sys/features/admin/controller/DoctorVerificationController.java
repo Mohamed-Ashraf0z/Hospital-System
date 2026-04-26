@@ -16,9 +16,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
+// @CrossOrigin(origins = "http://localhost:5173")
+// @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.OPTIONS})
 @RestController
 @RequestMapping("/api/admin/doctors")
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.OPTIONS})
 public class DoctorVerificationController {
 
     private final DoctorVerificationService verificationService;
