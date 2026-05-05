@@ -13,6 +13,8 @@ import com.hospita.sys.features.auth.entity.DataResponse;
 import com.hospita.sys.features.auth.entity.User;
 import com.hospita.sys.features.auth.helper.JwtUtil;
 import com.hospita.sys.features.auth.repo.AuthRepo;
+import com.hospita.sys.features.patient.entity.Patient;
+import com.hospita.sys.features.patient.repo.PatientRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -20,6 +22,9 @@ import jakarta.servlet.http.HttpServletRequest;
 public class AuthService {
     @Autowired
     private AuthRepo authRepo;
+
+    @Autowired
+    private PatientRepository patientrepo;
 
     @Autowired
     private TokenBlacklistService tokenBlacklistService;
@@ -80,6 +85,9 @@ public class AuthService {
         user.encryptPhone();
 
         User savedUser = authRepo.save(user);
+        Patient patient = new Patient();
+        patient.setId(user.getId());
+        patientrepo.save(patient);
 
         if (user.getRole().contains("Doctor")) {
             if (files.isEmpty()) {
