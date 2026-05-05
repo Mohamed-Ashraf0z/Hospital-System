@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +25,7 @@ import com.hospita.sys.features.auth.service.CloudinaryService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import tools.jackson.databind.ObjectMapper;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -55,6 +57,18 @@ public class AuthController {
         }
         return authService.signup(user, files);
     }
+
+    @PostMapping(value = "/signuptest", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+public ResponseEntity<ApiResponse> signup1(
+        @RequestParam("user") String user,
+    @RequestParam("files") List<MultipartFile> files
+) throws Exception {
+
+    ObjectMapper mapper = new ObjectMapper();
+    User user1 = mapper.readValue(user, User.class);
+
+    return authService.signup(user1, files);
+}
 
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse> logout(HttpServletRequest requesttBody) {
