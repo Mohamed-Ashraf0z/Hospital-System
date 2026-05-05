@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hospita.sys.features.auth.entity.ApiResponse;
 import com.hospita.sys.features.patient.entity.historyD;
+import com.hospita.sys.features.patient.service.DoctorService;
 import com.hospita.sys.features.patient.service.HistoryService;
 
 @RestController
@@ -20,14 +21,17 @@ public class PatientController {
     @Autowired
     private HistoryService historyService;
 
+    @Autowired
+    private DoctorService doctorService;
+
     @GetMapping
     public ResponseEntity<ApiResponse> getDoctors() {
-        return null;
+        return doctorService.getDoctors();
     }
 
     @GetMapping("/doctors/{id}")
     public ResponseEntity<ApiResponse> getDoctor(@PathVariable Long id) {
-        return null;
+        return doctorService.getDoctor(id);
     }
 
     @GetMapping("/history/{id}")
@@ -50,10 +54,10 @@ public class PatientController {
         return null;
     }
 
-    @PostMapping("/rate-doctor")
-    public ResponseEntity<ApiResponse> rateDoctor() {
-        return null;
-    }
+    // @PostMapping("/rate-doctor")
+    // public ResponseEntity<ApiResponse> rateDoctor(@RequestBody Long id) {
+    //     return null;
+    // }
 
     @PostMapping("/make-history")
     public ResponseEntity<ApiResponse> makeHistory(@RequestBody historyD historyD) {
