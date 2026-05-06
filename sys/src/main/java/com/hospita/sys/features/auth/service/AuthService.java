@@ -1,6 +1,8 @@
 package com.hospita.sys.features.auth.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +15,6 @@ import com.hospita.sys.features.auth.entity.DataResponse;
 import com.hospita.sys.features.auth.entity.User;
 import com.hospita.sys.features.auth.helper.JwtUtil;
 import com.hospita.sys.features.auth.repo.AuthRepo;
-import com.hospita.sys.features.patient.entity.Patient;
-import com.hospita.sys.features.patient.repo.PatientRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -22,9 +22,6 @@ import jakarta.servlet.http.HttpServletRequest;
 public class AuthService {
     @Autowired
     private AuthRepo authRepo;
-
-    @Autowired
-    private PatientRepository patientrepo;
 
     @Autowired
     private TokenBlacklistService tokenBlacklistService;
@@ -44,11 +41,16 @@ public class AuthService {
             String token = jwtUtil.generateToken(user, dbUser);
             // tokenBlacklistService.blacklistToken(token, jwtUtil.getRemainingTime(token));
 
+            Map<String, Object> data = new HashMap<>();
+            data.put("token", token);
+            data.put("id", dbUser.get().getId());
+            data.put("role", dbUser.get().getRole());
+
             return ResponseEntity.ok(
                     new ApiResponse(
                             true,
                             "login success",
-                            token,
+                            data,
                             null));
         }
         return ResponseEntity.ok(
@@ -85,9 +87,6 @@ public class AuthService {
         user.encryptPhone();
 
         User savedUser = authRepo.save(user);
-        Patient patient = new Patient();
-        patient.setId(user.getId());
-        patientrepo.save(patient);
 
         if (user.getRole().contains("Doctor")) {
             if (files.isEmpty()) {

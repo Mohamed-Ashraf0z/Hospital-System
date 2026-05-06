@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 public class Patient {
     @Id
-    private long id;
+    private Long id;
     @OneToOne
     private historyD history;
 
