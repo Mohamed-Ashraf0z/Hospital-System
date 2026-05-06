@@ -37,7 +37,7 @@ public class HistoryService {
     public ResponseEntity<ApiResponse> makeHistory(String history, Long id) {
         Optional<Patient> patient = patientRepository.findById(id);
         
-        if (!(patient.isPresent()) || patient.get().getHistory() != null) {
+        if (!(patient.isPresent())) {
             return ResponseEntity
         .status(HttpStatus.NOT_FOUND)
         .body(new ApiResponse(false, "not found", null, null));
