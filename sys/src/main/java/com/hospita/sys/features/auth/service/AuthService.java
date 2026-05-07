@@ -85,9 +85,12 @@ public class AuthService {
         user.encryptPhone();
 
         User savedUser = authRepo.save(user);
-        Patient patient = new Patient();
-        patient.setId(user.getId());
-        patientrepo.save(patient);
+        if (user.getRole().contains("Patient")) {
+            Patient patient = new Patient();
+            patient.setId(user.getId());
+            patientrepo.save(patient);
+        }
+        
 
         if (user.getRole().contains("Doctor")) {
             if (files.isEmpty()) {
