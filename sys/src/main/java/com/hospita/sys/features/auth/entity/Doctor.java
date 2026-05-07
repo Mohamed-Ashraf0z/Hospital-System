@@ -25,6 +25,9 @@ public class Doctor {
     @ElementCollection
     private List<String> certificates; // URLs
 
+    // @OneToMany(mappedBy = "doctor")
+    // private List<Appointment> appointments = new ArrayList<>();
+
     @OneToOne
     private User user;
 

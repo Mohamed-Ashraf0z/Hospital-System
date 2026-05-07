@@ -15,6 +15,8 @@ import com.hospita.sys.features.auth.entity.DataResponse;
 import com.hospita.sys.features.auth.entity.User;
 import com.hospita.sys.features.auth.helper.JwtUtil;
 import com.hospita.sys.features.auth.repo.AuthRepo;
+import com.hospita.sys.features.patient.entity.Patient;
+import com.hospita.sys.features.patient.repo.PatientRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -31,6 +33,9 @@ public class AuthService {
 
     @Autowired
     private CloudinaryService cloudinaryService;
+
+    @Autowired
+    private PatientRepository patientrepo;
 
     public ResponseEntity<ApiResponse> login(User user) {
         var dbUser = authRepo.findByEmail(user.getEmail());
@@ -87,6 +92,12 @@ public class AuthService {
         user.encryptPhone();
 
         User savedUser = authRepo.save(user);
+        if (user.getRole().contains("Patient")) {
+            Patient patient = new Patient();
+            patient.setId(user.getId());
+            patientrepo.save(patient);
+        }
+        
 
         if (user.getRole().contains("Doctor")) {
             if (files.isEmpty()) {

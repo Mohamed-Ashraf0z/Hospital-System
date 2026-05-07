@@ -10,9 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hospita.sys.features.auth.entity.ApiResponse;
+import com.hospita.sys.features.patient.Dto.CancelAppointmentDto;
+import com.hospita.sys.features.patient.entity.Appointment;
 import com.hospita.sys.features.patient.entity.historyD;
+import com.hospita.sys.features.patient.service.AppointmentService;
 import com.hospita.sys.features.patient.service.DoctorService;
 import com.hospita.sys.features.patient.service.HistoryService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/patient")
@@ -23,6 +28,9 @@ public class PatientController {
 
     @Autowired
     private DoctorService doctorService;
+
+    @Autowired
+    private AppointmentService appointmentService;
 
     @GetMapping
     public ResponseEntity<ApiResponse> getDoctors() {
@@ -39,19 +47,19 @@ public class PatientController {
         return historyService.getHistory(id);
     }
 
-    @GetMapping("/appointments")
-    public ResponseEntity<ApiResponse> getDoctorAppointments() {
-        return null;
+    @GetMapping("/appointments/{id}")
+    public ResponseEntity<ApiResponse> getMyAppointments(@PathVariable long id) {
+        return appointmentService.getMyAppointments(id);
     }
 
     @PostMapping("/appointment")
-    public ResponseEntity<ApiResponse> makeAppointment() {
-        return null;
+    public ResponseEntity<ApiResponse> makeAppointment(@Valid @RequestBody Appointment appointment) {
+        return appointmentService.makeAppointment(appointment);
     }
 
     @PostMapping("/cancel-appointment")
-    public ResponseEntity<ApiResponse> cancelAppointment() {
-        return null;
+    public ResponseEntity<ApiResponse> cancelAppointment(@RequestBody CancelAppointmentDto cancelAppointmentDto) {
+        return appointmentService.cancelAppointment(cancelAppointmentDto.getSlotid(), cancelAppointmentDto.getPatientid());
     }
 
     // @PostMapping("/rate-doctor")

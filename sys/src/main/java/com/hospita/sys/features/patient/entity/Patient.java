@@ -17,6 +17,9 @@ public class Patient {
     @OneToOne
     private historyD history;
 
+    // @OneToMany(mappedBy = "patient")
+    // private List<Appointment> appointments = new ArrayList<>();
+
     @OneToOne
     private User user;
 }
