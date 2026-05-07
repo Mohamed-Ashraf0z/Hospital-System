@@ -1,6 +1,8 @@
 package com.hospita.sys.features.auth.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +26,6 @@ public class AuthService {
     private AuthRepo authRepo;
 
     @Autowired
-    private PatientRepository patientrepo;
-
-    @Autowired
     private TokenBlacklistService tokenBlacklistService;
 
     @Autowired
@@ -34,6 +33,9 @@ public class AuthService {
 
     @Autowired
     private CloudinaryService cloudinaryService;
+
+    @Autowired
+    private PatientRepository patientrepo;
 
     public ResponseEntity<ApiResponse> login(User user) {
         var dbUser = authRepo.findByEmail(user.getEmail());
@@ -44,11 +46,16 @@ public class AuthService {
             String token = jwtUtil.generateToken(user, dbUser);
             // tokenBlacklistService.blacklistToken(token, jwtUtil.getRemainingTime(token));
 
+            Map<String, Object> data = new HashMap<>();
+            data.put("token", token);
+            data.put("id", dbUser.get().getId());
+            data.put("role", dbUser.get().getRole());
+
             return ResponseEntity.ok(
                     new ApiResponse(
                             true,
                             "login success",
-                            token,
+                            data,
                             null));
         }
         return ResponseEntity.ok(
