@@ -9,7 +9,7 @@ import com.hospita.sys.features.auth.entity.ApiResponse;
 import com.hospita.sys.features.auth.repo.DoctorRepository;
 
 @Service
-public class DoctorService {
+public class PatientDoctorService {
 
     @Autowired
     private DoctorRepository doctorRepository;

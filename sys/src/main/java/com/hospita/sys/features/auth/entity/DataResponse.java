@@ -15,4 +15,9 @@ public class DataResponse {
         this.role = role;
         this.id = id;
     }
+
+    public boolean isAuth() { return auth; }
+    public String getUsername() { return username; }
+    public String getRole() { return role; }
+    public Long getId() { return id; }
 }

@@ -11,12 +11,16 @@ public class UserDto {
     private Long id;
     private String username;
     private String role;
-    private boolean isFrozen;
+    private String email;
+    private boolean auth;
+    private boolean frozen;
 
     public UserDto(User user) {
         this.id = user.getId();
         this.username = user.getUsername();
         this.role = user.getRole();
-        this.isFrozen = user.isFrozen();
+        this.email = user.getEmail();
+        this.auth = user.getAuth();
+        this.frozen = user.isFrozen();
     }
 }

@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 
 import com.hospita.sys.features.auth.entity.ApiResponse;
 import com.hospita.sys.features.auth.repo.AuthRepo;
+import com.hospita.sys.features.auth.repo.DoctorRepository;
+import com.hospita.sys.features.doctor.entity.AppointedPatient;
+import com.hospita.sys.features.doctor.repo.AppointedPatientRepository;
 import com.hospita.sys.features.patient.entity.Appointment;
 import com.hospita.sys.features.patient.repo.AppointmentRepo;
 import com.hospita.sys.features.patient.repo.PatientRepository;
@@ -23,10 +26,16 @@ public class AppointmentService {
     @Autowired
     private AuthRepo authRepo;
 
+    @Autowired
+    private DoctorRepository doctorRepository;
+
+    @Autowired
+    private AppointedPatientRepository appointedPatientRepository;
+
     public ResponseEntity<ApiResponse> makeAppointment(Appointment appointment) {
         var patient = authRepo.findById(appointment.getPatient());
         var doctor = authRepo.findById(appointment.getDoctor());
-        var appointmentch = appointmentRepo.findById(appointment.getAvailabilitySlot());
+        var appointmentch = appointmentRepo.findByAvailabilitySlot(appointment.getAvailabilitySlot());
 
         if (!(patient.isPresent() && doctor.isPresent())) {
             return ResponseEntity
@@ -42,14 +51,20 @@ public class AppointmentService {
 
         appointment.setPatientName(authRepo.findById(appointment.getPatient()).get().getUsername());
         appointment.setDoctorName(authRepo.findById(appointment.getDoctor()).get().getUsername());
-        appointment.setHistory(patientRepository.findById(appointment.getPatient()).get().getHistory().getHistory());
-        appointment.setId(appointment.getAvailabilitySlot());
+
+        var patientRecord = patientRepository.findById(appointment.getPatient()).orElse(null);
+        String history = (patientRecord != null && patientRecord.getHistory() != null) ? patientRecord.getHistory().getHistory() : "";
+        appointment.setHistory(history);
         appointmentRepo.save(appointment);
-        // List<Appointment> appointments = patient.getAppointments();
-        // appointments.add(appointment);
-        // patient.setAppointments(
-        //         appointments
-        // );
+
+        // Create AppointedPatient record so the doctor can see and report this patient
+        doctorRepository.findById(appointment.getDoctor()).ifPresent(doctorEntity -> {
+            AppointedPatient appointedPatient = new AppointedPatient();
+            appointedPatient.setPatientUserId(appointment.getPatient());
+            appointedPatient.setPatientName(appointment.getPatientName());
+            appointedPatient.setDoctor(doctorEntity);
+            appointedPatientRepository.save(appointedPatient);
+        });
         return ResponseEntity.ok(new ApiResponse(true, "success", appointment, null));
     }
 
@@ -60,7 +75,7 @@ public class AppointmentService {
         .status(HttpStatus.NOT_FOUND)
         .body(new ApiResponse(false, "not found", null, null));
         }
-        if (appointmentRepo.findById(slotid).get().getPatient() != patientid) {
+        if (appointmentRepo.findById(slotid).get().getPatient().longValue() != patientid) {
             return ResponseEntity
         .status(HttpStatus.FORBIDDEN)
         .body(new ApiResponse(false, "not your appointment", null, null));
