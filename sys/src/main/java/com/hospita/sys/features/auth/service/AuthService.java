@@ -96,6 +96,18 @@ public class AuthService {
             Patient patient = new Patient();
             patient.setId(user.getId());
             patientrepo.save(patient);
+            
+            // Assign default Patient permissions
+            savedUser.getPermissions().addAll(java.util.Set.of(
+                "GET_DOCTORS", 
+                "GET_DOCTOR", 
+                "GET_HISTORY", 
+                "GET_MY_APPOINTMENTS", 
+                "MAKE_APPOINTMENT", 
+                "CANCEL_APPOINTMENT", 
+                "MAKE_HISTORY"
+            ));
+            authRepo.save(savedUser);
         }
         
 
@@ -106,6 +118,17 @@ public class AuthService {
             }
 
             cloudinaryService.uploadCertificates(savedUser.getId(), files);
+            
+            // Assign default Doctor permissions
+            savedUser.getPermissions().addAll(java.util.Set.of(
+                "UPDATE_BIO", 
+                "ADD_AVAILABILITY", 
+                "GET_AVAILABILITY", 
+                "GET_APPOINTED_PATIENTS", 
+                "SEND_REPORT",
+                "GET_HISTORY"
+            ));
+            authRepo.save(savedUser);
         }
 
         return ResponseEntity.ok(

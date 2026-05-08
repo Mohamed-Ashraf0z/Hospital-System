@@ -22,4 +22,11 @@ public class Patient {
 
     @OneToOne
     private User user;
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public historyD getHistory() { return history; }
+    public void setHistory(historyD history) { this.history = history; }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 }

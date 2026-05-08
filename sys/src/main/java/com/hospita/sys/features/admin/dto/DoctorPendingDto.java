@@ -15,6 +15,7 @@ public class DoctorPendingDto {
     // Doctor profile info
     private String specialization;
     private String bio;
+    private java.util.List<String> certificates;
 
     public DoctorPendingDto(User user, Doctor doctor) {
         this.id = user.getId();
@@ -25,6 +26,7 @@ public class DoctorPendingDto {
         if (doctor != null) {
             this.specialization = doctor.getSpecialization();
             this.bio = doctor.getBio();
+            this.certificates = doctor.getCertificates();
         }
     }
 }
