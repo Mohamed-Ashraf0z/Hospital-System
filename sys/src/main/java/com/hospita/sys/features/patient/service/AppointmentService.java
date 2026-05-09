@@ -51,6 +51,7 @@ public class AppointmentService {
 
         appointment.setPatientName(authRepo.findById(appointment.getPatient()).get().getUsername());
         appointment.setDoctorName(authRepo.findById(appointment.getDoctor()).get().getUsername());
+        appointment.setId((appointment.getAvailabilitySlot()));
 
         var patientRecord = patientRepository.findById(appointment.getPatient()).orElse(null);
         String history = (patientRecord != null && patientRecord.getHistory() != null) ? patientRecord.getHistory().getHistory() : "";

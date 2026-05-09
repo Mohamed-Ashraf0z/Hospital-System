@@ -2,8 +2,8 @@ package com.example.essayfeedback.auth.service;
 
 import java.util.List;
 
+import org.jvnet.hk2.annotations.Service;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.example.essayfeedback.auth.entity.Logs;
 import com.example.essayfeedback.auth.repo.logsrepo;
